@@ -2,19 +2,6 @@
 
 A simple Fish shell function for extracting various types of compressed archive files with a single command.
 
-## Features
-
-- Supports a wide range of archive formats: `.zip`, `.rar`, `.bz2`, `.gz`, `.tar`, `.tbz2`, `.tgz`, `.Z`, `.7z`, `.xz`, `.lzma`, `.exe`, `.tar.bz2`, `.tar.gz`, `.tar.xz` and more.
-- **Batch extraction**: Supports extracting multiple files at once.
-- **Handles filenames with spaces**.
-- Provides two commands:
-  - `extract <file1> [file2 ...]`: Extracts one or more archive files.
-  - `extract_and_remove <file1> [file2 ...]`: Extracts one or more archives and then deletes the original files.
-- Includes convenient aliases:
-  - `x <file1> [file2 ...]`: Alias for `extract <file1> [file2 ...]`
-  - `xr <file1> [file2 ...]`: Alias for `extract_and_remove <file1> [file2 ...]`
-- Friendly error messages and usage hints.
-
 ## Installation
 
 ```fish
