@@ -5,8 +5,6 @@
 #
 # Main functions:
 # - compress: Compress files/directories to various formats
-# - compress_to: Compress with custom output filename
-# - compress_fast/compress_best: Compress with specific compression levels
 
 # compress - Universal compression function
 #
@@ -332,37 +330,4 @@ function compress -d "Universal compression function supporting multiple formats
         end
         return 1
     end
-end
-
-# compress_to - Compress with explicit output filename
-#
-# Usage: compress_to <target> <output_name> [options]
-
-function compress_to -d "Compress with explicit output filename"
-    if test (count $argv) -lt 2
-        echo "Usage: compress_to <target> <output_name> [compress_options]"
-        return 1
-    end
-    
-    set -l target $argv[1]
-    set -l output_name $argv[2]
-    set -l options $argv[3..-1]
-    
-    compress $options "$target" "$output_name"
-end
-
-# compress_fast - Compress with fastest settings
-#
-# Usage: compress_fast <target> [output_name]
-
-function compress_fast -d "Compress with fastest settings (level 1)"
-    compress --fast $argv
-end
-
-# compress_best - Compress with best compression settings
-#
-# Usage: compress_best <target> [output_name]
-
-function compress_best -d "Compress with best compression settings (level 9)"
-    compress --best $argv
 end

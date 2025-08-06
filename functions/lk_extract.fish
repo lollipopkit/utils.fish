@@ -456,59 +456,6 @@ function extract_and_remove -d "Extract archives and remove source files after s
     return 0
 end
 
-# extract_to - Extract archives to a specific directory
-#
-# This function extracts archives to a specified target directory,
-# creating the directory if it doesn't exist.
-#
-# Usage: extract_to <target_directory> <archive1> [archive2 ...]
-
-function extract_to -d "Extract archives to a specific directory"
-    if test (count $argv) -lt 2
-        echo "Usage: extract_to <target_directory> <archive1> [archive2 ...]"
-        echo "Extract one or more archives to the specified directory."
-        return 1
-    end
-    
-    set -l target_dir $argv[1]
-    set -l archives $argv[2..-1]
-    
-    # Create target directory if it doesn't exist
-    if not test -d "$target_dir"
-        mkdir -p "$target_dir"
-        set -l mkdir_status $status
-        if test $mkdir_status -ne 0
-            echo "extract_to: Failed to create directory '$target_dir'" >&2
-            return 1
-        end
-        echo "Created directory '$target_dir'"
-    end
-    
-    # Change to target directory and extract
-    set -l original_pwd (pwd)
-    cd "$target_dir"
-    
-    # Convert relative archive paths to absolute paths
-    set -l abs_archives
-    for archive in $archives
-        if string match -q '/*' "$archive"
-            # Already absolute path
-            set abs_archives $abs_archives "$archive"
-        else
-            # Convert to absolute path
-            set abs_archives $abs_archives "$original_pwd/$archive"
-        end
-    end
-    
-    extract $abs_archives
-    set -l result $status
-    
-    # Return to original directory
-    cd "$original_pwd"
-    
-    return $result
-end
-
 # list_archive - List contents of archives without extracting
 #
 # This is a convenience wrapper around 'extract --list'

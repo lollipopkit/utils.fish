@@ -46,15 +46,17 @@ tar.bz2, tar.gz, tar.xz, lzma, bz2, rar, gz, tar, tbz2, tgz, zip, Z, 7z, xz, exe
 
 - `extract <file>` - Extract archives (alias: `x`)
 - `extract_and_remove <file>` - Extract and delete source (alias: `xr`)
-- `compress <directory>` - Compress to tar.gz (alias: `c`)
+- `compress <directory>` - Compress to tar.gz (alias: `cps`)
 
 ### System Functions
 
 - `kill_all <keyword>` - Kill all processes matching keyword (alias: `ka`)
 - `git_tag_push [tag] [message]` - Create and push git tag (alias: `gtp`)
 - `mdc <dir>` - Make directory and cd into it
-- `du_sort` - List directories by size (alias: `ds`)
-- `env_run <command>` - Run command with .env variables (alias: `er`)
+- `du_sort` - List directories by size (alias: `dus`)
+- `env_run <command>` - Run command with .env variables
+- `clean_temp` - Clean temporary files
+- `find_large <directory>` - Find large files in directory
 
 ## 📖 Complete Documentation
 

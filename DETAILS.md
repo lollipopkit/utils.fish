@@ -63,18 +63,6 @@ extract_and_remove -q *.rar           # Batch extract and remove quietly
 - Confirms each file removal
 - Works with all extract options
 
-### extract_to - Extract to Specific Directory
-
-Extract archives to a designated target directory, creating it if needed.
-
-**Usage:**
-
-```fish
-extract_to ~/Downloads archive.zip         # Extract to Downloads
-extract_to backup/ *.tar.gz                # Extract all to backup folder
-extract_to /tmp/test archive.rar           # Extract to absolute path
-```
-
 ### compress - Universal Compression Function
 
 Compress files and directories to various formats with extensive customization options.
@@ -120,27 +108,6 @@ compress --help                            # Show all options
 - `tar.zst` - Modern format, good speed/compression balance
 - `zip` - Cross-platform compatibility
 - `7z` - Excellent compression, many algorithms
-
-### Compression Utilities
-
-**compress_fast** - Quick compression with level 1:
-
-```fish
-compress_fast mydir                        # Equivalent to compress --fast
-```
-
-**compress_best** - Maximum compression with level 9:
-
-```fish
-compress_best mydir                        # Equivalent to compress --best
-```
-
-**compress_to** - Explicit output naming:
-
-```fish
-compress_to mydir backup.tar.gz           # Specify exact output name
-compress_to mydir release.zip -f zip      # With format override
-```
 
 ### Archive Information
 
@@ -269,7 +236,7 @@ List directories by size with advanced sorting and filtering options.
 **Basic Usage:**
 
 ```fish
-ds                                         # Sort current dir by size (alias)
+dus                                        # Sort current dir by size (alias)
 du_sort                                    # Full function name
 du_sort /home /var /tmp                    # Multiple directories
 ```
@@ -305,7 +272,6 @@ Load environment variables from .env files and run commands with those variables
 **Basic Usage:**
 
 ```fish
-er python app.py                           # Run with .env vars (alias)
 env_run npm start                          # Full function name
 ```
 
@@ -413,11 +379,10 @@ The following aliases are available for quick access:
 ```fish
 x          # extract
 xr         # extract_and_remove  
-c          # compress
+cps        # compress
 ka         # kill_all
 gtp        # git_tag_push
-ds         # du_sort
-er         # env_run
+dus        # du_sort
 ```
 
 ### Exit Codes
@@ -512,7 +477,7 @@ test_archive downloads/*.7z
 
 # Compress multiple directories
 for dir in project1 project2 project3
-    compress_fast $dir
+    compress $dir
 end
 
 # Environment-specific runs
