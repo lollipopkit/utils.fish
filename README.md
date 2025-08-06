@@ -62,4 +62,4 @@ For comprehensive usage instructions, advanced features, and detailed examples, 
 
 ## 📄 License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+GPL v3 License - see the [LICENSE](LICENSE) file for details.
