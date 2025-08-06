@@ -18,8 +18,8 @@ x archive.tar.gz                    # Quick extract
 xr archive.zip                      # Extract and remove source
 
 # Compress files/directories
-c mydir                             # Create mydir.tar.gz
-cz mydir                            # Create mydir.zip
+cps mydir                           # Create mydir.tar.gz
+cpsz mydir                          # Create mydir.zip
 ```
 
 ### System Utilities
@@ -33,7 +33,7 @@ gtp                                 # Auto-generate and push next version tag
 
 # Directory operations
 mdc project/src/utils               # Create nested dirs and cd to last
-ds                                  # Show directory sizes
+dus                                 # Show directory sizes
 ```
 
 ## 🔧 Supported Formats
