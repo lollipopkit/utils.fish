@@ -18,9 +18,8 @@ alias cfast "compress_fast "           # Fast compression
 alias cbest "compress_best "           # Best compression
 
 # Archive information and testing
-alias ainfo "archive_info "            # Archive format information
-alias alist "list_archive "            # List archive contents
-alias atest "test_archive "            # Test archive integrity
+alias arlist "list_archive "            # List archive contents
+alias artest "test_archive "            # Test archive integrity
 
 # Utility aliases
 alias ka "kill_all "                   # Enhanced process killer

@@ -7,7 +7,6 @@
 # - compress: Compress files/directories to various formats
 # - compress_to: Compress with custom output filename
 # - compress_fast/compress_best: Compress with specific compression levels
-# - archive_info: Display information about archive formats
 
 # compress - Universal compression function
 #
@@ -366,93 +365,4 @@ end
 
 function compress_best -d "Compress with best compression settings (level 9)"
     compress --best $argv
-end
-
-# archive_info - Display information about supported archive formats
-#
-# Usage: archive_info [format]
-
-function archive_info -d "Display information about supported archive formats"
-    if test (count $argv) -eq 0
-        echo "Supported Archive Formats:"
-        echo ""
-        echo "Format     | Extension  | Speed | Compression | Tools Required"
-        echo "-----------|------------|-------|-------------|---------------"
-        echo "tar.gz     | .tar.gz    | Fast  | Good        | tar, gzip (built-in)"
-        echo "tar.bz2    | .tar.bz2   | Slow  | Better      | tar, bzip2"
-        echo "tar.xz     | .tar.xz    | Slow  | Best        | tar, xz"
-        echo "tar.lz4    | .tar.lz4   | Very Fast | Fair    | tar, lz4"
-        echo "tar.zst    | .tar.zst   | Fast  | Very Good   | tar, zstd"
-        echo "zip        | .zip       | Fast  | Good        | zip"
-        echo "7z         | .7z        | Slow  | Excellent   | 7z"
-        echo ""
-        echo "Use 'archive_info <format>' for detailed information about a specific format."
-        return 0
-    end
-    
-    set -l format (string lower $argv[1])
-    switch $format
-        case tar.gz tgz
-            echo "TAR.GZ (Gzip compressed tar archive)"
-            echo "• Extension: .tar.gz, .tgz"
-            echo "• Speed: Fast"
-            echo "• Compression: Good"
-            echo "• Best for: General purpose, widely supported"
-            echo "• Tools: tar (built-in), gzip (built-in)"
-            
-        case tar.bz2 tbz2
-            echo "TAR.BZ2 (Bzip2 compressed tar archive)"
-            echo "• Extension: .tar.bz2, .tbz2"
-            echo "• Speed: Slow"
-            echo "• Compression: Better than gzip"
-            echo "• Best for: When smaller size is more important than speed"
-            echo "• Tools: tar (built-in), bzip2"
-            
-        case tar.xz
-            echo "TAR.XZ (XZ compressed tar archive)"
-            echo "• Extension: .tar.xz"
-            echo "• Speed: Slow"
-            echo "• Compression: Excellent"
-            echo "• Best for: Maximum compression for archival"
-            echo "• Tools: tar (built-in), xz"
-            
-        case tar.lz4
-            echo "TAR.LZ4 (LZ4 compressed tar archive)"
-            echo "• Extension: .tar.lz4"
-            echo "• Speed: Very Fast"
-            echo "• Compression: Fair"
-            echo "• Best for: When speed is most important"
-            echo "• Tools: tar (built-in), lz4"
-            
-        case tar.zst
-            echo "TAR.ZST (Zstandard compressed tar archive)"
-            echo "• Extension: .tar.zst"
-            echo "• Speed: Fast"
-            echo "• Compression: Very Good"
-            echo "• Best for: Good balance of speed and compression"
-            echo "• Tools: tar (built-in), zstd"
-            
-        case zip
-            echo "ZIP (ZIP archive format)"
-            echo "• Extension: .zip"
-            echo "• Speed: Fast"
-            echo "• Compression: Good"
-            echo "• Best for: Cross-platform compatibility, individual file compression"
-            echo "• Tools: zip, unzip (widely available)"
-            echo "• Special features: Can compress individual files within archive"
-            
-        case 7z
-            echo "7Z (7-Zip archive format)"
-            echo "• Extension: .7z"
-            echo "• Speed: Slow"
-            echo "• Compression: Excellent"
-            echo "• Best for: Maximum compression, supports many algorithms"
-            echo "• Tools: 7z"
-            echo "• Special features: Multiple compression algorithms, encryption support"
-            
-        case '*'
-            echo "Unknown format: $format"
-            echo "Use 'archive_info' to see all supported formats."
-            return 1
-    end
 end

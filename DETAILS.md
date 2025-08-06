@@ -144,14 +144,6 @@ compress_to mydir release.zip -f zip      # With format override
 
 ### Archive Information
 
-**archive_info** - Format documentation:
-
-```fish
-archive_info                               # Show all supported formats
-archive_info tar.gz                       # Details about specific format
-archive_info zip                           # Compression characteristics
-```
-
 **list_archive** - Content preview:
 
 ```fish
