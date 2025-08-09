@@ -14,10 +14,6 @@ alias cps "compress "                    # Quick compress
 alias cpsz "compress -f zip "            # Compress to zip format
 alias cps7 "compress -f 7z "             # Compress to 7z format
 
-# Archive information and testing
-alias arlist "list_archive "            # List archive contents
-alias artest "test_archive "            # Test archive integrity
-
 # Utility aliases
 alias ka "kill_all "                   # Enhanced process killer
 alias gtp "git_tag_push "              # Git tag management

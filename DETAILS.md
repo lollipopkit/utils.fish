@@ -2,15 +2,6 @@
 
 This document provides comprehensive usage instructions for all functions in the utils.fish collection.
 
-## Table of Contents
-
-- [Archive Operations](#archive-operations)
-- [System Utilities](#system-utilities)
-- [Supported Archive Formats](#supported-archive-formats)
-- [Command Reference](#command-reference)
-- [Examples](#examples)
-- [Dependencies](#dependencies)
-
 ## Archive Operations
 
 ### extract - Universal Archive Extractor
@@ -108,22 +99,6 @@ compress --help                            # Show all options
 - `tar.zst` - Modern format, good speed/compression balance
 - `zip` - Cross-platform compatibility
 - `7z` - Excellent compression, many algorithms
-
-### Archive Information
-
-**list_archive** - Content preview:
-
-```fish
-list_archive archive.zip                  # List files in archive
-list_archive *.tar.gz                     # List multiple archives
-```
-
-**test_archive** - Integrity verification:
-
-```fish
-test_archive archive.rar                  # Test single archive
-test_archive *.7z                         # Test multiple archives
-```
 
 ## System Utilities
 
@@ -347,29 +322,6 @@ clean_temp -v                              # Verbose output
 - System files (`.DS_Store`, `Thumbs.db`)
 - Cache directories (`.cache`, `__pycache__`, `node_modules/.cache`)
 
-## Supported Archive Formats
-
-| Format | Extension | Speed | Compression | Tools Required |
-|--------|-----------|-------|-------------|----------------|
-| tar.gz | .tar.gz, .tgz | Fast | Good | tar, gzip (built-in) |
-| tar.bz2 | .tar.bz2, .tbz2 | Slow | Better | tar, bzip2 |
-| tar.xz | .tar.xz | Slow | Best | tar, xz |
-| tar.lz4 | .tar.lz4 | Very Fast | Fair | tar, lz4 |
-| tar.zst | .tar.zst | Fast | Very Good | tar, zstd |
-| zip | .zip | Fast | Good | zip, unzip |
-| rar | .rar | Medium | Good | unrar |
-| 7z | .7z | Slow | Excellent | 7z |
-| gz | .gz | Fast | Good | gunzip (built-in) |
-| bz2 | .bz2 | Medium | Better | bunzip2 |
-| xz | .xz | Slow | Best | unxz |
-| lzma | .lzma | Slow | Best | unlzma |
-| Z | .Z | Fast | Fair | uncompress |
-| deb | .deb | N/A | N/A | dpkg-deb, ar |
-| rpm | .rpm | N/A | N/A | rpm2cpio, cpio |
-| cab | .cab | Medium | Good | cabextract |
-| iso | .iso | N/A | N/A | 7z |
-| exe | .exe | Medium | Variable | cabextract |
-
 ## Command Reference
 
 ### Aliases
@@ -401,106 +353,7 @@ All functions return appropriate exit codes:
 - **User Confirmation**: Prompts for destructive operations (unless forced)
 - **Detailed Error Messages**: Clear indication of what went wrong
 
-## Examples
-
-### Archive Workflow
-
-**Complete Archive Management:**
-
-```fish
-# Create a project archive
-compress -f tar.xz --best -e '*.log' -e 'node_modules' myproject
-
-# List contents before extraction
-list_archive myproject.tar.xz
-
-# Test archive integrity
-test_archive myproject.tar.xz
-
-# Extract to specific location
-extract_to ~/restored/ myproject.tar.xz
-
-# Extract and remove original
-extract_and_remove myproject.tar.xz
-```
-
-### Development Workflow
-
-**Project Setup and Management:**
-
-```fish
-# Create project structure
-mdc -v ~/projects/newapp/src/components
-mdc -v ~/projects/newapp/tests
-
-# Set up environment
-env_run --export  # Load .env variables
-env_run -s python manage.py runserver  # Run with environment
-
-# Clean up development files
-clean_temp -v
-find_large 10M
-
-# Create release
-git_tag_push --minor --dry-run  # Preview
-git_tag_push --minor "New feature release"
-```
-
-### System Maintenance
-
-**Regular Cleanup and Monitoring:**
-
-```fish
-# Process management
-kill_all -n chrome  # Check what would be killed
-kill_all -f stuck_process
-
-# Directory analysis
-du_sort -r -t 1G /home  # Find large directories
-du_sort -s -a  # Comprehensive analysis
-
-# File backup
-backup_file ~/.config/fish/config.fish
-backup_file ~/.bashrc ~/backups/
-```
-
-### Batch Operations
-
-**Multiple File Processing:**
-
-```fish
-# Extract multiple archives
-extract *.zip *.tar.gz *.rar
-
-# Test multiple archives
-test_archive downloads/*.7z
-
-# Compress multiple directories
-for dir in project1 project2 project3
-    compress $dir
-end
-
-# Environment-specific runs
-env_run -f .env.dev npm test
-env_run -f .env.prod npm run build
-```
-
-## Dependencies
-
-### Required Tools (Built-in)
-
-These tools are available on most Unix-like systems:
-
-- `tar` - Archive creation and extraction
-- `gzip`/`gunzip` - Gzip compression
-- `find` - File searching
-- `sort` - Output sorting
-- `du` - Directory usage
-- `ps` - Process information
-- `kill` - Process termination
-- `git` - Version control (for git_tag_push)
-
-### Optional Tools (Enhanced Features)
+## Optional Tools
 
 Install these tools for full functionality:
 
@@ -521,17 +374,3 @@ brew install unrar p7zip lz4 zstd cabextract rpm2cpio
 ```bash
 sudo pacman -S unrar p7zip lz4 zstd cabextract rpm-tools
 ```
-
-### Feature Dependencies
-
-| Feature | Required Tools | Fallback Behavior |
-|---------|----------------|-------------------|
-| RAR extraction | `unrar` | Error message, skip file |
-| 7z archives | `7z` or `7za` | Error message, skip file |
-| LZ4 compression | `lz4` | Error message, skip format |
-| Zstandard | `zstd` | Error message, skip format |
-| CAB/EXE files | `cabextract` | Error message, skip file |
-| RPM packages | `rpm2cpio`, `cpio` | Error message, skip file |
-| DEB packages | `dpkg-deb` or `ar` | Error message, skip file |
-
-The functions will gracefully handle missing dependencies by showing informative error messages and continuing with supported formats.
