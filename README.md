@@ -5,7 +5,7 @@ Fish shell utility collection for archive handling and system management.
 ## 📦 Installation
 
 ```fish
-fisher install lollipopkit/utils.fish
+fisher remove lollipopkit/utils.fish && fisher install lollipopkit/utils.fish
 ```
 
 ## ✏️ Usage
