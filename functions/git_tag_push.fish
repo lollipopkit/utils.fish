@@ -1,18 +1,3 @@
-# git_tag_push - Enhanced git tagging with semantic versioning support
-#
-# Creates annotated git tags with automatic version bumping and semantic versioning.
-# Supports conventional commit style messages and automatic changelog generation.
-#
-# Usage: git_tag_push [OPTIONS] [tag] [message]
-# Options:
-#   --major     Bump major version (X.0.0)
-#   --minor     Bump minor version (x.Y.0)
-#   --patch     Bump patch version (x.y.Z)
-#   --pre PRE   Add pre-release suffix (x.y.z-PRE)
-#   --dry-run   Show what would be tagged without creating tag
-#   -f, --force Force tag creation (overwrite existing)
-#   -h, --help  Show help message
-
 function git_tag_push -d "Create and push git tags with semantic versioning support"
     set -l tag ""
     set -l message ""
@@ -45,7 +30,7 @@ function git_tag_push -d "Create and push git tags with semantic versioning supp
                 echo "  -h, --help    Show this help"
                 echo ""
                 echo "Examples:"
-                echo "  git_tag_push                    # Auto-generate next patch version"
+                echo "  git_tag_push                    # Auto-generate next version based on commit count"
                 echo "  git_tag_push v1.2.3             # Create specific tag"
                 echo "  git_tag_push --minor            # Bump minor version"
                 echo "  git_tag_push --pre beta         # Create pre-release tag"
@@ -91,30 +76,43 @@ function git_tag_push -d "Create and push git tags with semantic versioning supp
         set -l latest_tag (git describe --tags --abbrev=0 2>/dev/null; or echo "v0.0.0")
         
         # Parse version components
-        set -l version (string replace -r '^v?(.*)$' '$1' "$latest_tag")
-        set -l parts (string split '.' "$version")
+        set -l ver_str (string replace -r '^v?(.*)$' '$1' "$latest_tag")
+        set -l parts (string split '.' "$ver_str")
         
         if test (count $parts) -ge 3
             set -l major $parts[1]
             set -l minor $parts[2]
             set -l patch (string replace -r '(\d+).*' '$1' $parts[3])
             
-            # Determine bump type if not specified
-            if test -z "$bump_type"
-                set bump_type "patch"
+            # Calculate commits since last tag
+            set -l commit_count 0
+            if test "$latest_tag" != "v0.0.0"
+                set commit_count (git rev-list --count "$latest_tag..HEAD" 2>/dev/null; or echo "0")
+            else
+                set commit_count (git rev-list --count HEAD 2>/dev/null; or echo "0")
             end
             
-            # Apply version bump
-            switch $bump_type
-                case major
-                    set major (math $major + 1)
-                    set minor 0
-                    set patch 0
-                case minor
-                    set minor (math $minor + 1)
-                    set patch 0
-                case patch
-                    set patch (math $patch + 1)
+            # Apply version bump based on type
+            if test -n "$bump_type"
+                # Manual bump type specified - ignore commit count
+                switch $bump_type
+                    case major
+                        set major (math $major + 1)
+                        set minor 0
+                        set patch 0
+                    case minor
+                        set minor (math $minor + 1)
+                        set patch 0
+                    case patch
+                        set patch (math $patch + 1)
+                end
+            else
+                # Auto bump - patch + commit count
+                if test $commit_count -eq 0
+                    echo "git_tag_push: no new commits since last tag '$latest_tag'" >&2
+                    return 1
+                end
+                set patch (math $patch + $commit_count)
             end
             
             # Construct new tag
@@ -122,17 +120,32 @@ function git_tag_push -d "Create and push git tags with semantic versioning supp
             if test -n "$prerelease"
                 set tag "$tag-$prerelease"
             end
+            
+            # Show calculation info
+            if test -z "$bump_type"
+                echo "Latest tag: $latest_tag"
+                echo "Commits since last tag: $commit_count"
+                echo "Calculated tag: $tag"
+            end
         else
-            # Fallback to commit count method
+            # Fallback for invalid version format
             set -l count (git rev-list --count HEAD)
             set tag "v1.0.$count"
+            echo "Warning: Invalid version format in '$latest_tag', using fallback"
         end
     end
     
     # Generate message if not provided
     if test -z "$message"
         # Try to generate message from recent commits
-        set -l recent_commits (git log --oneline -10 --pretty=format:"%s")
+        set -l commit_range
+        if test "$latest_tag" != "v0.0.0" -a (git tag -l "$latest_tag" | grep -q "$latest_tag")
+            set commit_range "$latest_tag..HEAD"
+        else
+            set commit_range "HEAD~10..HEAD"
+        end
+        
+        set -l recent_commits (git log --oneline --pretty=format:"%s" $commit_range 2>/dev/null)
         if test -n "$recent_commits"
             set message "Release $tag
 
@@ -147,7 +160,7 @@ Recent changes:"
     end
     
     # Check if tag already exists
-    if git tag -l "$tag" | grep -q "$tag"
+    if git tag -l "$tag" | grep -q "^$tag\$"
         if test $force = false
             echo "git_tag_push: tag '$tag' already exists (use --force to overwrite)" >&2
             return 1
@@ -199,9 +212,6 @@ Recent changes:"
     end
     
     echo "✓ Tag '$tag' created and pushed successfully"
-    
-    # Show tag information
-    git show --stat "$tag"
     
     return 0
 end
