@@ -120,13 +120,6 @@ function git_tag_push -d "Create and push git tags with semantic versioning supp
             if test -n "$prerelease"
                 set tag "$tag-$prerelease"
             end
-            
-            # Show calculation info
-            if test -z "$bump_type"
-                echo "Latest tag: $latest_tag"
-                echo "Commits since last tag: $commit_count"
-                echo "Calculated tag: $tag"
-            end
         else
             # Fallback for invalid version format
             set -l count (git rev-list --count HEAD)
