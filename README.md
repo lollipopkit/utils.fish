@@ -29,11 +29,8 @@ tar.bz2, tar.gz, tar.xz, lzma, bz2, rar, gz, tar, tbz2, tgz, zip, Z, 7z, xz, exe
 - `clean_temp` - Clean temporary files
 - `find_large <directory>` - Find large files in directory
 - `dvbak <volume_name> [backup_name]` - Backup Docker volume to tar.gz
-
-## 📖 Complete Documentation
-
-For comprehensive usage instructions, advanced features, and detailed examples, see **[details](DETAILS.md)**.
+- `rand4k <filename|/dev/xxx> <randread|randwrite|randrw> [runtime_s]` - Random 4k disk benchmark (fio, defaults to 30s)
 
 ## 📄 License
 
-GPL v3 License - see the [LICENSE](LICENSE) file for details.
+AGPL v3 License - see the [LICENSE](LICENSE) file for details.
