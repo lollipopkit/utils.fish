@@ -23,6 +23,7 @@ tar.bz2, tar.gz, tar.xz, tar.zst, tar.lz4, lzma, bz2, rar, gz, tar, tbz2, tgz, z
 
 - `backup_file <file> [backup_dir]` - Create a timestamped copy of any file.
 - `dvbak <volume> [backup.tar.gz]` - Snapshot a Docker volume into the current directory (requires `docker`).
+- `dvrst <backup_file> [volume_name]` - Restore a Docker volume from a tar.gz backup file (requires `docker`).
 
 ### System & Maintenance
 
