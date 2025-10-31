@@ -11,27 +11,37 @@ function dvrst --description "Restore a Docker volume from a tar.gz backup file"
         return 1
     end
 
-    set backup_file $argv[1]
+    set -l backup_file $argv[1]
 
     # Set volume name
+    set -l volume (string replace -r '\.tar\.gz$' '' (basename -- "$backup_file"))
     if test (count $argv) -ge 2
-        set volume $argv[2]
-    else
-        set volume (string replace -r '\.tar\.gz$' '' (basename $backup_file))
+        set -l volume $argv[2]
     end
 
-    if not test -f $backup_file
+    if not test -f "$backup_file"
         echo "Error: Backup file '$backup_file' not found."
         return 1
     end
 
+    set -l backup_dir (begin
+        set -l dir (dirname -- "$backup_file")
+        if test "$dir" = "."
+            pwd
+        else
+            cd "$dir"; and pwd
+        end
+    end)
+
+    set -l backup_name (basename -- "$backup_file")
+
     # Create the volume if it doesn't exist
-    docker volume create $volume > /dev/null
+    docker volume create "$volume" > /dev/null
 
     # Restore the backup
     docker run --rm \
-        -v $volume:/data \
-        -v (pwd):/backup \
+        -v "$volume":/data \
+        -v "$backup_dir":/backup \
         alpine \
-        sh -c "cd /data && tar xzf /backup/(basename $backup_file)"
+        tar -xzf "/backup/$backup_name" -C /data
 end
