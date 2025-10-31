@@ -6,7 +6,7 @@
 #   dvrst my-vol.tar.gz         # restores to volume 'my-vol'
 #   dvrst backup.tgz my-vol     # restores to volume 'my-vol'
 function dvrst --description "Restore a Docker volume from a tar.gz backup file"
-    if test (count $argv) -lt 2
+    if test (count $argv) -lt 1
         echo "Usage: dvrst <backup_file> [volume_name]"
         return 1
     end
