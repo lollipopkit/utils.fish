@@ -17,6 +17,8 @@
 #   -l, --level LEVEL     Compression level (1-9, where 9 is best compression)
 #   -q, --quiet           Suppress verbose output
 #   -e, --exclude PATTERN Exclude files matching pattern
+#   -g, --gitignore       Respect .gitignore rules (default: disabled)
+#   --no-gitignore        Disable .gitignore filtering (default)
 #   --fast                Use fastest compression (level 1)
 #   --best                Use best compression (level 9)
 #   -h, --help            Show help message
@@ -26,10 +28,11 @@ function compress -d "Universal compression function supporting multiple formats
     set -l format ""
     set -l level ""
     set -l quiet_mode false
+    set -l use_gitignore false
     set -l exclude_patterns
     set -l target ""
     set -l output_name ""
-    
+
     # Parse arguments
     set -l i 1
     while test $i -le (count $argv)
@@ -43,6 +46,8 @@ function compress -d "Universal compression function supporting multiple formats
                 echo "  -l, --level LEVEL     Compression level (1-9)"
                 echo "  -q, --quiet           Suppress verbose output"
                 echo "  -e, --exclude PATTERN Exclude files matching pattern"
+                echo "  -g, --gitignore       Respect .gitignore rules (default: disabled)"
+                echo "  --no-gitignore        Disable .gitignore filtering (default)"
                 echo "  --fast                Use fastest compression (level 1)"
                 echo "  --best                Use best compression (level 9)"
                 echo "  -h, --help            Show this help"
@@ -74,6 +79,10 @@ function compress -d "Universal compression function supporting multiple formats
                 end
             case -q --quiet
                 set quiet_mode true
+            case -g --gitignore
+                set use_gitignore true
+            case --no-gitignore
+                set use_gitignore false
             case -e --exclude
                 set i (math $i + 1)
                 if test $i -le (count $argv)
@@ -101,18 +110,18 @@ function compress -d "Universal compression function supporting multiple formats
         end
         set i (math $i + 1)
     end
-    
+
     # Validate target
     if test -z "$target"
         echo "Usage: compress [OPTIONS] <target> [output_name]"
         return 1
     end
-    
+
     if not test -e "$target"
         echo "compress: '$target' does not exist" >&2
         return 1
     end
-    
+
     # Determine format if not specified
     if test -z "$format"
         if test -n "$output_name"
@@ -129,9 +138,9 @@ function compress -d "Universal compression function supporting multiple formats
                 case "*.tar.lz4"
                     set format "tar.lz4"
                 case "*.zip"
-                    set format "zip"
+                    set format zip
                 case "*.7z"
-                    set format "7z"
+                    set format 7z
                 case "*"
                     set format "tar.gz"
             end
@@ -139,7 +148,7 @@ function compress -d "Universal compression function supporting multiple formats
             set format "tar.gz"
         end
     end
-    
+
     # Generate output filename if not provided
     if test -z "$output_name"
         switch $format
@@ -153,13 +162,13 @@ function compress -d "Universal compression function supporting multiple formats
                 set output_name "$target.tar.zst"
             case "tar.lz4"
                 set output_name "$target.tar.lz4"
-            case "zip"
+            case zip
                 set output_name "$target.zip"
-            case "7z"
+            case 7z
                 set output_name "$target.7z"
         end
     end
-    
+
     # Check if output file already exists
     if test -e "$output_name"
         echo "compress: '$output_name' already exists. Overwrite? (y/N)"
@@ -169,7 +178,7 @@ function compress -d "Universal compression function supporting multiple formats
             return 1
         end
     end
-    
+
     # Display compression info
     if test $quiet_mode = false
         set -l size_info ""
@@ -180,8 +189,45 @@ function compress -d "Universal compression function supporting multiple formats
         end
         echo "Compressing '$target'$size_info to '$output_name' using $format format..."
     end
-    
+
     # Build exclude arguments
+    if test $use_gitignore = true; and test -d "$target"; and command -q git
+        set -l target_abs (cd "$target" 2>/dev/null; and pwd -P)
+        set -l git_root (git -C "$target" rev-parse --show-toplevel 2>/dev/null)
+
+        if test -n "$target_abs"; and test -n "$git_root"
+            set -l target_rel "."
+            if test "$target_abs" != "$git_root"
+                if string match -q "$git_root/*" "$target_abs"
+                    set target_rel (string replace "$git_root/" "" "$target_abs")
+                end
+            end
+
+            set -l ignored_paths (git -C "$git_root" ls-files --others -i --exclude-standard --directory --no-empty-directory -- "$target_rel" 2>/dev/null)
+
+            if test (count $ignored_paths) -gt 0
+                set -l target_prefix ""
+                if test "$target_rel" = "."; and test "$target" != "."
+                    set target_prefix (string trim -r -c '/' -- "$target")
+                end
+
+                for ignored in $ignored_paths
+                    set -l normalized (string trim -r -c '/' -- "$ignored")
+                    if string match -q './*' "$normalized"
+                        set normalized (string sub -s 3 "$normalized")
+                    end
+                    if test -n "$target_prefix"
+                        set normalized "$target_prefix/$normalized"
+                    end
+                    if test -n "$normalized"
+                        set exclude_patterns $exclude_patterns "$normalized"
+                        set exclude_patterns $exclude_patterns "$normalized/*"
+                    end
+                end
+            end
+        end
+    end
+
     set -l exclude_args
     for pattern in $exclude_patterns
         switch $format
@@ -194,7 +240,7 @@ function compress -d "Universal compression function supporting multiple formats
                 set exclude_args $exclude_args "-x!$pattern"
         end
     end
-    
+
     # Compression level arguments
     set -l level_args
     if test -n "$level"
@@ -208,9 +254,9 @@ function compress -d "Universal compression function supporting multiple formats
                     case tar.xz
                         set level_args "-$level"
                     case tar.zst
-                        set level_args "--zstd" "-$level"
+                        set level_args --zstd "-$level"
                     case tar.lz4
-                        set level_args "--lz4" "-$level"
+                        set level_args --lz4 "-$level"
                 end
             case zip
                 set level_args "-$level"
@@ -218,11 +264,11 @@ function compress -d "Universal compression function supporting multiple formats
                 set level_args "-mx=$level"
         end
     end
-    
+
     # Execute compression
     set -l start_time (date +%s)
     set -l success false
-    
+
     switch $format
         case tar.gz
             if test $quiet_mode = true
@@ -231,7 +277,7 @@ function compress -d "Universal compression function supporting multiple formats
                 tar -czvf "$output_name" $exclude_args $level_args "$target"
             end
             set success true
-            
+
         case tar.bz2
             if test $quiet_mode = true
                 tar -cjf "$output_name" $exclude_args $level_args "$target"
@@ -239,7 +285,7 @@ function compress -d "Universal compression function supporting multiple formats
                 tar -cjvf "$output_name" $exclude_args $level_args "$target"
             end
             set success true
-            
+
         case tar.xz
             if test $quiet_mode = true
                 tar -cJf "$output_name" $exclude_args $level_args "$target"
@@ -247,7 +293,7 @@ function compress -d "Universal compression function supporting multiple formats
                 tar -cJvf "$output_name" $exclude_args $level_args "$target"
             end
             set success true
-            
+
         case tar.zst
             if command -q zstd
                 if test $quiet_mode = true
@@ -260,7 +306,7 @@ function compress -d "Universal compression function supporting multiple formats
                 echo "compress: zstd command not found for tar.zst format" >&2
                 return 1
             end
-            
+
         case tar.lz4
             if command -q lz4
                 if test $quiet_mode = true
@@ -273,7 +319,7 @@ function compress -d "Universal compression function supporting multiple formats
                 echo "compress: lz4 command not found for tar.lz4 format" >&2
                 return 1
             end
-            
+
         case zip
             if test $quiet_mode = true
                 zip -r $level_args "$output_name" "$target" $exclude_args
@@ -281,7 +327,7 @@ function compress -d "Universal compression function supporting multiple formats
                 zip -rv $level_args "$output_name" "$target" $exclude_args
             end
             set success true
-            
+
         case 7z
             if command -q 7z
                 7z a $level_args "$output_name" "$target" $exclude_args
@@ -290,22 +336,22 @@ function compress -d "Universal compression function supporting multiple formats
                 echo "compress: 7z command not found for 7z format" >&2
                 return 1
             end
-            
+
         case '*'
             echo "compress: unsupported format '$format'" >&2
             return 1
     end
-    
+
     # Check result and display summary
     set -l command_status $status
     if test $command_status -eq 0; and test $success = true
         set -l end_time (date +%s)
         set -l duration (math $end_time - $start_time)
-        
+
         if test $quiet_mode = false
             set -l original_size ""
             set -l compressed_size ""
-            
+
             if command -q du
                 if test -e "$output_name"
                     set compressed_size (du -sh "$output_name" | cut -f1)
@@ -314,7 +360,7 @@ function compress -d "Universal compression function supporting multiple formats
                     set original_size (du -sh "$target" | cut -f1)
                 end
             end
-            
+
             echo "✓ Compression completed in {$duration}s"
             if test -n "$original_size"; and test -n "$compressed_size"
                 echo "  Original: $original_size → Compressed: $compressed_size"
