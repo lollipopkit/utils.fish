@@ -12,6 +12,21 @@ function code -d "Open Visual Studio Code with optional paths"
         set args "."
     end
 
+    if test "$TERM_PROGRAM" = "vscode"; and set -q VSCODE_IPC_HOOK_CLI
+        for base in ~/.vscode-server ~/.cursor-server ~/.vscode-remote
+            if not test -d "$base/cli/servers"
+                continue
+            end
+
+            for candidate in (find "$base/cli/servers" -type f -path '*/server/bin/remote-cli/code' 2>/dev/null | sort -r)
+                if test -x "$candidate"
+                    command "$candidate" $args
+                    return $status
+                end
+            end
+        end
+    end
+
     set -l system (uname)
     set -l is_wsl false
     if test "$system" = "Linux"
