@@ -7,6 +7,11 @@
 # Supports: tar.bz2, tar.gz, tar.xz, tar.lz4, tar.zst, lzma, bz2, rar, gz, tar, tbz2, tgz, zip, Z, 7z, xz, exe, deb, rpm, cab, iso
 
 function extract -d "Universal archive extractor with support for 20+ formats"
+    set -l tar_exclude_args --exclude="__MACOSX" --exclude="__MACOSX/*" --exclude=".DS_Store" --exclude="*/.DS_Store"
+    set -l unzip_exclude_args "__MACOSX/*" ".DS_Store" "*/.DS_Store"
+    set -l unrar_exclude_args -x__MACOSX -x__MACOSX/* -x.DS_Store -x*.DS_Store
+    set -l sevenzip_exclude_args -xr!__MACOSX -xr!.DS_Store
+
     # Display help if no arguments provided
     if test (count $argv) -eq 0
         echo "Usage: extract [OPTIONS] <archive1> [archive2 ...]"
@@ -82,45 +87,45 @@ function extract -d "Universal archive extractor with support for 20+ formats"
         switch (string lower $file)
             case "*.tar.bz2" "*.tbz2"
                 if test $list_mode = true
-                    tar -tjf "$file"
+                    tar -tjf "$file" $tar_exclude_args
                 else if test $test_mode = true
-                    tar -tjf "$file" >/dev/null
+                    tar -tjf "$file" $tar_exclude_args >/dev/null
                 else
-                    set extract_cmd "tar -xjf '$file'"
+                    set extract_cmd "tar -xjf '$file' [excluding __MACOSX/.DS_Store]"
                     if test $quiet_mode = false
-                        tar -xvjf "$file"
+                        tar -xvjf "$file" $tar_exclude_args
                     else
-                        tar -xjf "$file"
+                        tar -xjf "$file" $tar_exclude_args
                     end
                 end
                 set extracted true
                 
             case "*.tar.gz" "*.tgz"
                 if test $list_mode = true
-                    tar -tzf "$file"
+                    tar -tzf "$file" $tar_exclude_args
                 else if test $test_mode = true
-                    tar -tzf "$file" >/dev/null
+                    tar -tzf "$file" $tar_exclude_args >/dev/null
                 else
-                    set extract_cmd "tar -xzf '$file'"
+                    set extract_cmd "tar -xzf '$file' [excluding __MACOSX/.DS_Store]"
                     if test $quiet_mode = false
-                        tar -xvzf "$file"
+                        tar -xvzf "$file" $tar_exclude_args
                     else
-                        tar -xzf "$file"
+                        tar -xzf "$file" $tar_exclude_args
                     end
                 end
                 set extracted true
                 
             case "*.tar.xz"
                 if test $list_mode = true
-                    tar -tJf "$file"
+                    tar -tJf "$file" $tar_exclude_args
                 else if test $test_mode = true
-                    tar -tJf "$file" >/dev/null
+                    tar -tJf "$file" $tar_exclude_args >/dev/null
                 else
-                    set extract_cmd "tar -xJf '$file'"
+                    set extract_cmd "tar -xJf '$file' [excluding __MACOSX/.DS_Store]"
                     if test $quiet_mode = false
-                        tar -xvJf "$file"
+                        tar -xvJf "$file" $tar_exclude_args
                     else
-                        tar -xJf "$file"
+                        tar -xJf "$file" $tar_exclude_args
                     end
                 end
                 set extracted true
@@ -128,12 +133,12 @@ function extract -d "Universal archive extractor with support for 20+ formats"
             case "*.tar.lz4"
                 if command -q lz4
                     if test $list_mode = true
-                        lz4 -dc "$file" | tar -t
+                        lz4 -dc "$file" | tar -t $tar_exclude_args
                     else if test $test_mode = true
                         lz4 -t "$file"
                     else
-                        set extract_cmd "lz4 -dc '$file' | tar -x"
-                        lz4 -dc "$file" | tar -x
+                        set extract_cmd "lz4 -dc '$file' | tar -x [excluding __MACOSX/.DS_Store]"
+                        lz4 -dc "$file" | tar -x $tar_exclude_args
                     end
                     set extracted true
                 else
@@ -143,12 +148,12 @@ function extract -d "Universal archive extractor with support for 20+ formats"
             case "*.tar.zst"
                 if command -q zstd
                     if test $list_mode = true
-                        zstd -dc "$file" | tar -t
+                        zstd -dc "$file" | tar -t $tar_exclude_args
                     else if test $test_mode = true
                         zstd -t "$file"
                     else
-                        set extract_cmd "zstd -dc '$file' | tar -x"
-                        zstd -dc "$file" | tar -x
+                        set extract_cmd "zstd -dc '$file' | tar -x [excluding __MACOSX/.DS_Store]"
+                        zstd -dc "$file" | tar -x $tar_exclude_args
                     end
                     set extracted true
                 else
@@ -157,30 +162,30 @@ function extract -d "Universal archive extractor with support for 20+ formats"
                 
             case "*.tar"
                 if test $list_mode = true
-                    tar -tf "$file"
+                    tar -tf "$file" $tar_exclude_args
                 else if test $test_mode = true
-                    tar -tf "$file" >/dev/null
+                    tar -tf "$file" $tar_exclude_args >/dev/null
                 else
-                    set extract_cmd "tar -xf '$file'"
+                    set extract_cmd "tar -xf '$file' [excluding __MACOSX/.DS_Store]"
                     if test $quiet_mode = false
-                        tar -xvf "$file"
+                        tar -xvf "$file" $tar_exclude_args
                     else
-                        tar -xf "$file"
+                        tar -xf "$file" $tar_exclude_args
                     end
                 end
                 set extracted true
                 
             case "*.zip"
                 if test $list_mode = true
-                    unzip -l "$file"
+                    unzip -l "$file" $unzip_exclude_args
                 else if test $test_mode = true
                     unzip -t "$file"
                 else
-                    set extract_cmd "unzip '$file'"
+                    set extract_cmd "unzip '$file' [excluding __MACOSX/.DS_Store]"
                     if test $quiet_mode = false
-                        unzip "$file"
+                        unzip "$file" -x $unzip_exclude_args
                     else
-                        unzip -q "$file"
+                        unzip -q "$file" -x $unzip_exclude_args
                     end
                 end
                 set extracted true
@@ -192,8 +197,8 @@ function extract -d "Universal archive extractor with support for 20+ formats"
                     else if test $test_mode = true
                         unrar t "$file"
                     else
-                        set extract_cmd "unrar x -ad '$file'"
-                        unrar x -ad "$file"
+                        set extract_cmd "unrar x -ad '$file' [excluding __MACOSX/.DS_Store]"
+                        unrar x -ad "$file" $unrar_exclude_args
                     end
                     set extracted true
                 else
@@ -207,8 +212,8 @@ function extract -d "Universal archive extractor with support for 20+ formats"
                     else if test $test_mode = true
                         7z t "$file"
                     else
-                        set extract_cmd "7z x '$file'"
-                        7z x "$file"
+                        set extract_cmd "7z x '$file' [excluding __MACOSX/.DS_Store]"
+                        7z x "$file" $sevenzip_exclude_args
                     end
                     set extracted true
                 else

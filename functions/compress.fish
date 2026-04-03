@@ -30,6 +30,7 @@ function compress -d "Universal compression function supporting multiple formats
     set -l quiet_mode false
     set -l use_gitignore false
     set -l exclude_patterns
+    set -l default_exclude_patterns "__MACOSX" "__MACOSX/*" ".DS_Store" "*/.DS_Store"
     set -l target ""
     set -l output_name ""
 
@@ -227,6 +228,8 @@ function compress -d "Universal compression function supporting multiple formats
             end
         end
     end
+
+    set exclude_patterns $default_exclude_patterns $exclude_patterns
 
     set -l exclude_args
     for pattern in $exclude_patterns
