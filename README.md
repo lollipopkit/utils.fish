@@ -17,7 +17,7 @@ tar.bz2, tar.gz, tar.xz, tar.zst, tar.lz4, lzma, bz2, rar, gz, tar, tbz2, tgz, z
 
 - `extract <file>` - Universal archive extractor with format auto-detection (alias: `x`, plus `xl`/`xt` helpers). Requires format-specific tools such as `tar`, `unzip`, `7z`, `unrar`, `zstd`, `lz4`, `cabextract`, etc.
 - `extract_and_remove <file>` - Extract archives and delete the source on success (alias: `xr`).
-- `compress [options] <target> [output]` - Flexible archiver supporting tar.gz/bz2/xz/zst/lz4, zip, and 7z (aliases: `cps`, `cpsz`, `cps7`). Optional dependencies: `zstd`, `lz4`, `7z`.
+- `compress [options] <target> [output]` - Flexible archiver supporting tar.gz/bz2/xz/zst/lz4, zip, and 7z (aliases: `cps`, `cpsz`, `cps7`). On macOS it excludes `__MACOSX`, `.DS_Store`, and `._*` by default; use `--no-ignore-macos` to keep them, or `--ignore-macos` to force the same behavior on other platforms. Optional dependencies: `zstd`, `lz4`, `7z`.
 
 ### Backup & Storage
 

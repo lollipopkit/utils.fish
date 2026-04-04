@@ -19,6 +19,8 @@
 #   -e, --exclude PATTERN Exclude files matching pattern
 #   -g, --gitignore       Respect .gitignore rules (default: disabled)
 #   --no-gitignore        Disable .gitignore filtering (default)
+#   --ignore-macos        Exclude macOS metadata such as __MACOSX, .DS_Store, and ._*
+#   --no-ignore-macos     Keep macOS metadata files in archives
 #   --fast                Use fastest compression (level 1)
 #   --best                Use best compression (level 9)
 #   -h, --help            Show help message
@@ -29,8 +31,12 @@ function compress -d "Universal compression function supporting multiple formats
     set -l level ""
     set -l quiet_mode false
     set -l use_gitignore false
+    set -l ignore_macos false
+    if test (uname) = Darwin
+        set ignore_macos true
+    end
     set -l exclude_patterns
-    set -l default_exclude_patterns "__MACOSX" "__MACOSX/*" ".DS_Store" "*/.DS_Store"
+    set -l macos_exclude_patterns "__MACOSX" "__MACOSX/*" ".DS_Store" "*/.DS_Store" "._*" "*/._*"
     set -l target ""
     set -l output_name ""
 
@@ -49,18 +55,23 @@ function compress -d "Universal compression function supporting multiple formats
                 echo "  -e, --exclude PATTERN Exclude files matching pattern"
                 echo "  -g, --gitignore       Respect .gitignore rules (default: disabled)"
                 echo "  --no-gitignore        Disable .gitignore filtering (default)"
+                echo "  --ignore-macos        Exclude macOS metadata files"
+                echo "  --no-ignore-macos     Keep macOS metadata files"
                 echo "  --fast                Use fastest compression (level 1)"
                 echo "  --best                Use best compression (level 9)"
                 echo "  -h, --help            Show this help"
                 echo ""
                 echo "Supported formats: tar.gz, tar.bz2, tar.xz, tar.zst, tar.lz4, zip, 7z"
                 echo "Default format: tar.gz"
+                echo "macOS default: ignore __MACOSX, .DS_Store, ._*"
                 echo ""
                 echo "Examples:"
                 echo "  compress mydir                    # Creates mydir.tar.gz"
                 echo "  compress -f zip mydir             # Creates mydir.zip"
                 echo "  compress --best mydir backup      # Creates backup.tar.gz with best compression"
                 echo "  compress -e '*.tmp' mydir         # Exclude .tmp files"
+                echo "  compress --ignore-macos mydir     # Exclude __MACOSX/.DS_Store/._*"
+                echo "  compress --no-ignore-macos mydir  # Keep macOS metadata files"
                 return 0
             case -f --format
                 set i (math $i + 1)
@@ -84,6 +95,10 @@ function compress -d "Universal compression function supporting multiple formats
                 set use_gitignore true
             case --no-gitignore
                 set use_gitignore false
+            case --ignore-macos
+                set ignore_macos true
+            case --no-ignore-macos
+                set ignore_macos false
             case -e --exclude
                 set i (math $i + 1)
                 if test $i -le (count $argv)
@@ -229,7 +244,9 @@ function compress -d "Universal compression function supporting multiple formats
         end
     end
 
-    set exclude_patterns $default_exclude_patterns $exclude_patterns
+    if test $ignore_macos = true
+        set exclude_patterns $macos_exclude_patterns $exclude_patterns
+    end
 
     set -l exclude_args
     for pattern in $exclude_patterns
