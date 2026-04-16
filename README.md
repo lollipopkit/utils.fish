@@ -36,6 +36,7 @@ tar.bz2, tar.gz, tar.xz, tar.zst, tar.lz4, lzma, bz2, rar, gz, tar, tbz2, tgz, z
 
 - `env_run [options] <command>` - Load variables from `.env` files with validation/export support.
 - `mdc [options] <dir...>` - Create directories and `cd` into the last one with optional verbose/mode flags.
+- `git_blame_file <file> [line|start,end] [git blame options]` - Quickly inspect blame information for a file or a specific line/range (alias: `gbf`).
 - `git_tag_push [options] [tag] [message]` - Create annotated tags with semantic bumps and push upstream (alias: `gtp`).
 - `code [path...]` - Open Visual Studio Code for the current directory or provided paths, falling back to `open`, Flatpak, or Windows install locations when the CLI is missing.
 

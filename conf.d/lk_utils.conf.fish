@@ -17,6 +17,7 @@ alias cps7 "compress -f 7z "             # Compress to 7z format
 # Utility aliases
 alias ka "kill_all "                   # Enhanced process killer
 alias gtp "git_tag_push "              # Git tag management
+alias gbf "git_blame_file "            # Quick git blame for a file
 alias dus "du_sort "                    # Directory size analysis
 
 # Set default options for common commands (if not already set)
